@@ -1,66 +1,42 @@
-using System;
-using System.Threading;
+namespace SingletonIdGenerator;
 
-namespace SingletonIdGenerator
+public sealed class IdGenerator
 {
-    public sealed class IdGenerator
+    // Единственный экземпляр с ленивой инициализацией
+    private static readonly Lazy<IdGenerator> _instance = new(() => new IdGenerator());
+
+    // Счётчик ID
+    private long _counter = 0;
+
+    // Закрытый конструктор
+    private IdGenerator() { }
+
+    // Метод получения экземпляра (потокобезопасный)
+    public static IdGenerator GetInstance() => _instance.Value;
+
+    // Генерация уникального ID
+    public long NextId() => Interlocked.Increment(ref _counter);
+
+    // Генерация ID с префиксом
+    public string NextId(string prefix) => $"{prefix}-{NextId()}";
+}
+
+class Program
+{
+    static void Main()
     {
-        // Единственный экземпляр
-        private static IdGenerator _instance;
+        var generator1 = IdGenerator.GetInstance();
+        var generator2 = IdGenerator.GetInstance();
 
-        // Объект для блокировки
-        private static readonly object _lock = new object();
+        Console.WriteLine("Проверка Singleton:");
+        Console.WriteLine(ReferenceEquals(generator1, generator2));
 
-        // Счётчик ID
-        private long _counter = 0;
+        Console.WriteLine("\nГенерация ID:");
+        Console.WriteLine(generator1.NextId());
+        Console.WriteLine(generator2.NextId());
+        Console.WriteLine(generator1.NextId("USR"));
+        Console.WriteLine(generator2.NextId("ORD"));
 
-        // Закрытый конструктор
-        private IdGenerator() { }
-
-        // Метод получения экземпляра (потокобезопасный)
-        public static IdGenerator GetInstance()
-        {
-            lock (_lock)
-            {
-                if (_instance == null)
-                {
-                    _instance = new IdGenerator();
-                }
-            }
-
-            return _instance;
-        }
-
-        // Генерация уникального ID
-        public long NextId()
-        {
-            return Interlocked.Increment(ref _counter);
-        }
-
-        // Генерация ID с префиксом
-        public string NextId(string prefix)
-        {
-            return $"{prefix}-{NextId()}";
-        }
-    }
-
-    class Program
-    {
-        static void Main()
-        {
-            var generator1 = IdGenerator.GetInstance();
-            var generator2 = IdGenerator.GetInstance();
-
-            Console.WriteLine("Проверка Singleton:");
-            Console.WriteLine(Object.ReferenceEquals(generator1, generator2));
-
-            Console.WriteLine("\nГенерация ID:");
-            Console.WriteLine(generator1.NextId());
-            Console.WriteLine(generator2.NextId());
-            Console.WriteLine(generator1.NextId("USR"));
-            Console.WriteLine(generator2.NextId("ORD"));
-
-            Console.ReadKey();
-        }
+        Console.ReadKey();
     }
 }
