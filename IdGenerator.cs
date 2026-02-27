@@ -20,23 +20,3 @@ public sealed class IdGenerator
     // Генерация ID с префиксом
     public string NextId(string prefix) => $"{prefix}-{NextId()}";
 }
-
-class Program
-{
-    static void Main()
-    {
-        var generator1 = IdGenerator.GetInstance();
-        var generator2 = IdGenerator.GetInstance();
-
-        Console.WriteLine("Проверка Singleton:");
-        Console.WriteLine(ReferenceEquals(generator1, generator2));
-
-        Console.WriteLine("\nГенерация ID:");
-        Console.WriteLine(generator1.NextId());
-        Console.WriteLine(generator2.NextId());
-        Console.WriteLine(generator1.NextId("USR"));
-        Console.WriteLine(generator2.NextId("ORD"));
-
-        Console.ReadKey();
-    }
-}
